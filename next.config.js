@@ -8,6 +8,7 @@ const nextConfig = {
       'avatars.mds.yandex.net',
       'img.freepik.com',
       'images.all-free-download.com',
+      'res.cloudinary.com',
     ],
   },
 }

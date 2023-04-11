@@ -6,6 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
 import Youtube from '@tiptap/extension-youtube'
 import Image from '@tiptap/extension-image'
+import axios from 'axios'
 
 import Toolbar from './Toolbar'
 import EditLink from './Link/EditLink'
@@ -16,6 +17,8 @@ interface Props {}
 const Editor: FC<Props> = (): JSX.Element => {
   const [selectionRange, setSelectionRange] = useState<Range>()
   const [showGallery, setShowGallery] = useState<boolean>(false)
+  const [images, setImages] = useState<{ src: string }[]>([])
+  const [uploading, setUploading] = useState<boolean>(false)
 
   const editor = useEditor({
     extensions: [
@@ -69,11 +72,29 @@ const Editor: FC<Props> = (): JSX.Element => {
       .run()
   }
 
+  const fetchImages = async () => {
+    const { data } = await axios('/api/image')
+    setImages(data.images)
+  }
+
+  const handleImageUpload = async (image: File) => {
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('image', image)
+    const { data } = await axios.post('/api/image', formData)
+    setImages([data, ...images])
+    setUploading(false)
+  }
+
   useEffect(() => {
     if (editor && selectionRange) {
       editor.commands.setTextSelection(selectionRange)
     }
   }, [editor, selectionRange])
+
+  useEffect(() => {
+    fetchImages()
+  }, [])
 
   return (
     <>
@@ -94,7 +115,9 @@ const Editor: FC<Props> = (): JSX.Element => {
         visible={showGallery}
         onClose={() => setShowGallery(false)}
         onSelect={handleImageSelection}
-        // onFileSelect={() => console.log('hi')}
+        images={images}
+        onFileSelect={handleImageUpload}
+        uploading={uploading}
       />
     </>
   )

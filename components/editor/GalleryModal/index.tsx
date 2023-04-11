@@ -14,49 +14,17 @@ export interface ImageSelectionResult {
 interface Props extends ModalProps {
   onFileSelect(image: File): void
   onSelect(result: ImageSelectionResult): void
+  images: { src: string }[]
+  uploading?: boolean
 }
-
-const images = [
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-  },
-  {
-    src: 'https://www.whoa.in/download/sparrow-image-photo-taken-at-the-right-moment-hd-wallpaper',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg/1320px-Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg',
-  },
-  {
-    src: 'https://avatars.mds.yandex.net/i?id=e67c20f98bdc512c5d3bc20c140f8fac-5719595-images-taas-consumers&n=27&h=480&w=480',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg/1320px-Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg',
-  },
-  {
-    src: 'https://img.freepik.com/free-photo/purple-osteospermum-daisy-flower_1373-16.jpg?w=360',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg/1320px-Leucanthemum_vulgare_%27Filigran%27_Flower_2200px.jpg',
-  },
-  {
-    src: 'https://images.all-free-download.com/images/graphiclarge/nice_flower_204852.jpg',
-  },
-  {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-  },
-]
 
 const GalleryModal: FC<Props> = ({
   visible,
   onClose,
   onFileSelect,
   onSelect,
+  images,
+  uploading,
 }): JSX.Element => {
   const [selectedImage, setSelectedImage] = useState('')
   const [altText, setAltText] = useState('')
@@ -94,6 +62,7 @@ const GalleryModal: FC<Props> = ({
               images={images}
               selectedImage={selectedImage}
               onSelect={(src) => setSelectedImage(src)}
+              uploading={uploading}
             />
           </div>
 
