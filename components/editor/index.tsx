@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { ChangeEventHandler, FC, useEffect, useState } from 'react'
 import { useEditor, EditorContent, getMarkRange, Range } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -11,14 +11,41 @@ import axios from 'axios'
 import Toolbar from './Toolbar'
 import EditLink from './Link/EditLink'
 import GalleryModal, { ImageSelectionResult } from './GalleryModal'
+import SeoForm, { SeoResult } from './SeoForm'
+import ActionButton from '../common/ActionButton'
+import ThumbnailSelector from './ThumbnailSelector'
 
-interface Props {}
+export interface FinalPost extends SeoResult {
+  title: string
+  content: string
+  thumbnail?: File | string
+}
 
-const Editor: FC<Props> = (): JSX.Element => {
+interface Props {
+  initialValue?: FinalPost
+  btnTitle?: string
+  busy?: boolean
+  onSubmit(post: FinalPost): void
+}
+
+const Editor: FC<Props> = ({
+  initialValue,
+  btnTitle = 'Submit',
+  busy = false,
+  onSubmit,
+}): JSX.Element => {
   const [selectionRange, setSelectionRange] = useState<Range>()
   const [showGallery, setShowGallery] = useState<boolean>(false)
   const [images, setImages] = useState<{ src: string }[]>([])
   const [uploading, setUploading] = useState<boolean>(false)
+  const [post, setPost] = useState<FinalPost>({
+    title: '',
+    content: '',
+    meta: '',
+    tags: '',
+    slug: '',
+  })
+  const [seoInitialValue, setSeoInitialValue] = useState<SeoResult>()
 
   const editor = useEditor({
     extensions: [
@@ -86,6 +113,25 @@ const Editor: FC<Props> = (): JSX.Element => {
     setUploading(false)
   }
 
+  const updateTitleHandler: ChangeEventHandler<HTMLInputElement> = ({
+    target,
+  }) => {
+    setPost({ ...post, title: target.value })
+  }
+
+  const updateSeoValueHandler = (result: SeoResult) => {
+    setPost({ ...post, ...result })
+  }
+
+  const updateThumbnailHandler = (file: File) => {
+    setPost({ ...post, thumbnail: file })
+  }
+
+  const handleSubmit = () => {
+    if (!editor) return
+    onSubmit({ ...post, content: editor.getHTML() })
+  }
+
   useEffect(() => {
     if (editor && selectionRange) {
       editor.commands.setTextSelection(selectionRange)
@@ -96,19 +142,64 @@ const Editor: FC<Props> = (): JSX.Element => {
     fetchImages()
   }, [])
 
+  useEffect(() => {
+    if (initialValue) {
+      setPost({ ...initialValue })
+      editor?.commands.setContent(initialValue.content)
+
+      const { slug, meta, tags } = initialValue
+
+      setSeoInitialValue({ slug, meta, tags })
+    }
+  }, [initialValue, editor])
+
   return (
     <>
       <div className='p-3 dark:bg-primary-dark bg-primary transition'>
-        <Toolbar
-          editor={editor}
-          onOpenImageClick={() => setShowGallery(true)}
-        />
+        <div className='sticky top-0 z-10 bg-primary dark:bg-primary-dark'>
+          {/* Thumbnail Selector and Submit Button */}
+          <div className='flex items-center justify-between mb-3'>
+            <ThumbnailSelector
+              onChange={updateThumbnailHandler}
+              initialValue={post.thumbnail as string}
+            />
+            <div className='inline-block'>
+              <ActionButton
+                title={btnTitle}
+                onClick={handleSubmit}
+                busy={busy}
+              />
+            </div>
+          </div>
 
-        <div className='h-[1px] w-full bg-secondary-light dark:bg-secondary-light my-3' />
+          {/* Title Input */}
+          <input
+            className='bg-transparent w-full border-0 border-b-[1px] border-secondary-dark dark:border-secondary-light text-3xl font-semibold italic text-primary-dark dark:text-primary mb-3 py-2 outline-none'
+            type='text'
+            placeholder='Title'
+            value={post.title}
+            onChange={updateTitleHandler}
+          />
+
+          <Toolbar
+            editor={editor}
+            onOpenImageClick={() => setShowGallery(true)}
+          />
+
+          <div className='h-[1px] w-full bg-secondary-dark dark:bg-secondary-light my-3' />
+        </div>
 
         {editor ? <EditLink editor={editor} /> : null}
 
-        <EditorContent editor={editor} />
+        <EditorContent className='min-h-[300px]' editor={editor} />
+
+        <div className='h-[1px] w-full bg-secondary-dark dark:bg-secondary-light my-3' />
+
+        <SeoForm
+          onChange={updateSeoValueHandler}
+          title={post.title}
+          initialValue={seoInitialValue}
+        />
       </div>
 
       <GalleryModal
