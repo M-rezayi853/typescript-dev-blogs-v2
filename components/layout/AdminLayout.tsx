@@ -9,7 +9,7 @@ import {
   AiOutlineFileAdd,
 } from 'react-icons/ai'
 
-import AdminNav from '../common/AdminNav'
+import AdminNav from '../common/nav/AdminNav'
 import AppHead from '../common/AppHead'
 
 interface Props {
