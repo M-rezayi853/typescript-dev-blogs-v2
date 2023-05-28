@@ -6,7 +6,7 @@ const dbConnect = async () => {
   try {
     const connection = await mongoose.connect(uri)
 
-    console.log(connection)
+    // console.log(connection)
 
     return connection
   } catch (error) {
