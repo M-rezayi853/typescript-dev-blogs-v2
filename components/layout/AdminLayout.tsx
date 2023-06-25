@@ -5,12 +5,12 @@ import {
   AiOutlineContainer,
   AiOutlineTeam,
   AiOutlineMail,
-  AiOutlineContacts,
   AiOutlineFileAdd,
 } from 'react-icons/ai'
 
 import AdminNav from '../common/nav/AdminNav'
 import AppHead from '../common/AppHead'
+import AdminSecondaryNav from '../common/nav/AdminSecondaryNav'
 
 interface Props {
   children: ReactNode
@@ -22,7 +22,6 @@ const navItems = [
   { href: '/admin/posts', icon: AiOutlineContainer, label: 'Posts' },
   { href: '/admin/users', icon: AiOutlineTeam, label: 'Users' },
   { href: '/admin/comments', icon: AiOutlineMail, label: 'Comments' },
-  { href: '/admin/contact', icon: AiOutlineContacts, label: 'Contact' },
 ]
 
 const AdminLayout: FC<Props> = ({ children, title }): JSX.Element => {
@@ -32,7 +31,11 @@ const AdminLayout: FC<Props> = ({ children, title }): JSX.Element => {
       <div className='flex'>
         <AdminNav navItems={navItems} />
 
-        <div className='flex-1 p-4'>{children}</div>
+        <div className='flex-1 p-4 dark:bg-primary-dark bg-primary'>
+          <AdminSecondaryNav />
+
+          {children}
+        </div>
 
         <Link
           href={'/admin/posts/create'}

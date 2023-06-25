@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NextPage, GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import axios from 'axios'
 
@@ -14,7 +15,10 @@ interface PostResponse extends FinalPost {
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>
 
 const Update: NextPage<Props> = ({ post }) => {
+  const [updating, setUpdating] = useState(false)
+
   const handleSubmit = async (post: FinalPost) => {
+    setUpdating(true)
     try {
       // we have to generate FormData
       const formData = generateFormData(post)
@@ -25,12 +29,18 @@ const Update: NextPage<Props> = ({ post }) => {
     } catch (error: any) {
       console.log(error.response.data)
     }
+    setUpdating(false)
   }
 
   return (
     <AdminLayout title='Update'>
       <div className='max-w-4xl mx-auto'>
-        <Editor initialValue={post} onSubmit={handleSubmit} btnTitle='Update' />
+        <Editor
+          initialValue={post}
+          onSubmit={handleSubmit}
+          busy={updating}
+          btnTitle='Update'
+        />
       </div>
     </AdminLayout>
   )

@@ -7,9 +7,10 @@ interface Props {
   src: string
   selected?: boolean
   onClick?(): void
+  alt: string
 }
 
-const Image: FC<Props> = ({ src, selected, onClick }): JSX.Element => {
+const Image: FC<Props> = ({ src, selected, onClick, alt }): JSX.Element => {
   return (
     <div
       className='relative rounded overflow-hidden cursor-pointer'
@@ -21,7 +22,7 @@ const Image: FC<Props> = ({ src, selected, onClick }): JSX.Element => {
         width={200}
         height={200}
         style={{ objectFit: 'cover' }}
-        alt='gallery'
+        alt={alt}
       />
 
       <div className='absolute top-2 left-2'>

@@ -1,7 +1,7 @@
 import { NextApiHandler } from 'next'
 
 import Post from '@/models/Post'
-import { readFile } from '@/lib/utils'
+import { isAdmin, readFile } from '@/lib/utils'
 import { postValidationSchema, validateSchema } from '@/lib/validator'
 import cloudinary from '@/lib/cloudinary'
 import formidable from 'formidable'
@@ -18,12 +18,18 @@ const handler: NextApiHandler = (req, res) => {
     case 'PATCH':
       return updatePost(req, res)
 
+    case 'DELETE':
+      return removePost(req, res)
+
     default:
       res.status(404).send('Not found!')
   }
 }
 
 const updatePost: NextApiHandler = async (req, res) => {
+  const admin = await isAdmin(req, res)
+  if (!admin) return res.status(401).json({ error: 'unauthorized request!' })
+
   const postId = req.query.postId as string
 
   const post = await Post.findById(postId)
@@ -65,6 +71,29 @@ const updatePost: NextApiHandler = async (req, res) => {
 
   await post.save()
   res.json({ post })
+}
+
+const removePost: NextApiHandler = async (req, res) => {
+  try {
+    const admin = await isAdmin(req, res)
+    if (!admin) return res.status(401).json({ error: 'unauthorized request!' })
+
+    const postId = req.query.postId as string
+
+    const post = await Post.findByIdAndDelete(postId)
+
+    if (!post) return res.status(404).json({ error: 'Post not found!' })
+
+    // remove thumbnail from post
+    const publicId = post.thumbnail?.public_id
+    if (publicId) {
+      await cloudinary.uploader.destroy(publicId)
+    }
+
+    res.json({ removed: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
 }
 
 export default handler

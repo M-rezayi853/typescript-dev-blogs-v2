@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
 import { FC } from 'react'
 import { BsCardImage } from 'react-icons/bs'
 
@@ -33,6 +32,7 @@ const Gallery: FC<Props> = ({
               src={src}
               selected={selectedImage === src}
               onClick={() => onSelect(src)}
+              alt='gallery'
             />
           </div>
         )

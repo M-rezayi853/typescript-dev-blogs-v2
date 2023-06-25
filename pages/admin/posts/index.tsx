@@ -6,6 +6,7 @@ import AdminLayout from '../../../components/layout/AdminLayout'
 import { PostDetail } from '@/utils/types'
 import { formatPosts, readPostsFromDb } from '@/lib/utils'
 import InfiniteScrollPost from '@/components/common/InfiniteScrollPost'
+import { filterPosts } from '@/utils/helper'
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>
 
@@ -14,14 +15,14 @@ const limit = 9
 
 const Posts: NextPage<Props> = ({ posts }) => {
   const [postsToRender, setPostsToRender] = useState(posts)
-  const [hasMorePosts, sethasMorePosts] = useState(true)
+  const [hasMorePosts, sethasMorePosts] = useState(posts.length >= limit)
 
   const fetchMorePosts = async () => {
     try {
       pageNo++
 
       const { data } = await axios.get(
-        `/api/posts?limit=${limit}&pageNo=${pageNo}`
+        `/api/posts?limit=${limit}&skip=${postsToRender.length}`
       )
 
       if (data.posts.length < limit) {
@@ -35,15 +36,20 @@ const Posts: NextPage<Props> = ({ posts }) => {
   }
 
   return (
-    <AdminLayout>
-      <InfiniteScrollPost
-        hasMore={hasMorePosts}
-        next={fetchMorePosts}
-        dataLength={postsToRender.length}
-        posts={postsToRender}
-        showControls
-      />
-    </AdminLayout>
+    <>
+      <AdminLayout>
+        <InfiniteScrollPost
+          hasMore={hasMorePosts}
+          next={fetchMorePosts}
+          dataLength={postsToRender.length}
+          posts={postsToRender}
+          showControls
+          onPostRemoved={(post) =>
+            setPostsToRender(filterPosts(postsToRender, post))
+          }
+        />
+      </AdminLayout>
+    </>
   )
 }
 

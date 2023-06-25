@@ -10,6 +10,7 @@ import { GithubAuthButton } from '@/components/button'
 import ProfileHead from '../ProfileHead'
 import DropdownOptions, { OptionsDropdown } from '../DropdownOptions'
 import { UserProfile } from '@/utils/types'
+import useDarkMode from '@/hooks/useDarkMode'
 
 interface Props {}
 
@@ -25,6 +26,7 @@ const defaultOptions: OptionsDropdown = [
 const UserNav: FC<Props> = (): JSX.Element => {
   const router = useRouter()
   const { data, status } = useSession()
+  const { toggleTheme } = useDarkMode()
 
   const profile = data?.user as UserProfile | undefined
 
@@ -57,7 +59,10 @@ const UserNav: FC<Props> = (): JSX.Element => {
       </Link>
 
       <div className='flex items-center space-x-5'>
-        <button className='text-secondary-light dark:text-secondary-dark'>
+        <button
+          onClick={toggleTheme}
+          className='text-secondary-light dark:text-secondary-dark'
+        >
           <HiLightBulb size={34} />
         </button>
 

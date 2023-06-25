@@ -1,11 +1,13 @@
 import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import axios from 'axios'
 
 import DefaultLayout from '@/components/layout/DefaultLayout'
-import { PostDetail } from '@/utils/types'
+import { PostDetail, UserProfile } from '@/utils/types'
 import { formatPosts, readPostsFromDb } from '@/lib/utils'
 import InfiniteScrollPost from '@/components/common/InfiniteScrollPost'
+import { filterPosts } from '@/utils/helper'
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>
 
@@ -13,17 +15,20 @@ let pageNo = 0
 const limit = 9
 
 const Home: NextPage<Props> = ({ posts }) => {
-  const [postsToRender, setPostsToRender] = useState(posts)
-  const [hasMorePosts, sethasMorePosts] = useState(true)
+  const { data } = useSession()
+  const profile = data?.user as UserProfile
 
-  const isAdmin = false
+  const [postsToRender, setPostsToRender] = useState(posts)
+  const [hasMorePosts, sethasMorePosts] = useState(posts.length >= limit)
+
+  const isAdmin = profile && profile.role === 'admin'
 
   const fetchMorePosts = async () => {
     try {
       pageNo++
 
       const { data } = await axios.get(
-        `/api/posts?limit=${limit}&pageNo=${pageNo}`
+        `/api/posts?limit=${limit}&skip=${postsToRender.length}`
       )
 
       if (data.posts.length < limit) {
@@ -45,6 +50,9 @@ const Home: NextPage<Props> = ({ posts }) => {
           dataLength={postsToRender.length}
           posts={postsToRender}
           showControls={isAdmin}
+          onPostRemoved={(post) =>
+            setPostsToRender(filterPosts(postsToRender, post))
+          }
         />
       </div>
     </DefaultLayout>

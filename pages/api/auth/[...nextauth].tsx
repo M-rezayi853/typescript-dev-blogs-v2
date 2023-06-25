@@ -4,7 +4,7 @@ import GithubAuthProvider from 'next-auth/providers/github'
 import dbConnect from '@/lib/dbConnect'
 import User from '@/models/User'
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GithubAuthProvider({
       clientId: process.env.GITHUB_CLIENT_ID as string,
